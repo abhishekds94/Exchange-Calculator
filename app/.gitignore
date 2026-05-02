@@ -1,0 +1,61 @@
+# Gradle
+.gradle/
+build/
+.gradle
+
+# Android
+.idea/
+*.iml
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+.classpath
+.project
+.settings/
+*.jks
+*.keystore
+*.jks
+local.properties
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+keystore/release.keystore
+
+# Logs
+*.log
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Kotlin
+*.kt.bak
+
+# Compiled class files
+*.class
+
+# Built APK files
+app-*.apk
+app-*.aab
+
+# Secrets - Never commit these
+secrets.properties
+local.properties
+
+# Gradle wrapper
+gradle/wrapper/gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar

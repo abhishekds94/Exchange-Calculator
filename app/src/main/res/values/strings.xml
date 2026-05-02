@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Exchange Calculator</string>
+    <string name="usd_coin">USDc</string>
+    <string name="exchange_rate">Exchange Rate</string>
+    <string name="select_currency">Select Currency</string>
+    <string name="swap_currencies">Swap Currencies</string>
+    <string name="loading">Loading exchange rates...</string>
+    <string name="error_network">No internet connection</string>
+    <string name="error_server">Something went wrong. Please try again.</string>
+    <string name="error_timeout">Request timed out. Please try again.</string>
+    <string name="retry">Retry</string>
+    <string name="close">Close</string>
+</resources>
