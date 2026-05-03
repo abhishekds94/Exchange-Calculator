@@ -1,6 +1,7 @@
 package com.exchangecalculator.app.di
 
 import com.exchangecalculator.app.BuildConfig
+import com.exchangecalculator.app.data.remote.ExchangeRateApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +24,7 @@ object NetworkModule {
     fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        coerceInputValues = true
     }
 
     @Provides
@@ -44,6 +46,13 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor { chain ->
+                val originalRequest = chain.request()
+                val requestBuilder = originalRequest.newBuilder()
+                    .header("Accept", "application/json")
+                    .header("User-Agent", "ExchangeCalculator/1.0")
+                chain.proceed(requestBuilder.build())
+            }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -62,5 +71,11 @@ object NetworkModule {
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideExchangeRateApi(retrofit: Retrofit): ExchangeRateApi {
+        return retrofit.create(ExchangeRateApi::class.java)
     }
 }
