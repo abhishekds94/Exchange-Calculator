@@ -2,7 +2,6 @@ package com.exchangecalculator.app.presentation.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,19 +33,17 @@ fun NoInternetScreen(
             Icon(
                 imageVector = Icons.Default.WifiOff,
                 contentDescription = "No internet",
-                tint = MaterialTheme.colorScheme.error,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .height(64.dp)
                     .padding(bottom = 16.dp)
             )
-
             Text(
                 text = "No Internet Connection",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
             Text(
                 text = "Please check your connection and try again",
                 style = MaterialTheme.typography.bodyMedium,
@@ -54,10 +51,7 @@ fun NoInternetScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-
-            Button(
-                onClick = onRetry
-            ) {
+            Button(onClick = onRetry) {
                 Text("Retry")
             }
         }
