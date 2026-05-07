@@ -30,14 +30,16 @@ fun ExchangeCalculatorScreen(
                 .padding(paddingValues)
         ) {
             when {
-                uiState.errorMessage != null && uiState.availableCurrencies.isEmpty() ->
+                (!uiState.isNetworkAvailable || uiState.isNetworkError) &&
+                        uiState.availableCurrencies.isEmpty() ->
+                    NoInternetScreen(onRetry = viewModel::retry)
+
+                uiState.errorMessage != null &&
+                        uiState.availableCurrencies.isEmpty() ->
                     ErrorScreen(
                         errorMessage = uiState.errorMessage!!,
                         onRetry = viewModel::retry
                     )
-
-                !uiState.isNetworkAvailable && uiState.availableCurrencies.isEmpty() ->
-                    NoInternetScreen(onRetry = viewModel::retry)
 
                 else ->
                     ExchangeCalculatorContent(

@@ -14,6 +14,7 @@ data class ExchangeCalculatorUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isNetworkAvailable: Boolean = true,
+    val isNetworkError: Boolean = false,
     val isUsdcOnTop: Boolean = true
 ) {
     val isEnabled: Boolean get() = !isLoading

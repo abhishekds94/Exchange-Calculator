@@ -45,7 +45,7 @@ class ExchangeCalculatorViewModel @Inject constructor(
 
     private fun loadAvailableCurrencies() {
         viewModelScope.launch {
-            updateUiState { copy(isLoading = true, errorMessage = null) }
+            updateUiState { copy(isLoading = true, errorMessage = null, isNetworkError = false) }
             when (val result = getAvailableCurrenciesUseCase()) {
                 is Result.Success -> {
                     val first = result.data.firstOrNull()
@@ -53,17 +53,23 @@ class ExchangeCalculatorViewModel @Inject constructor(
                         copy(
                             availableCurrencies = result.data,
                             isLoading = false,
-                            selectedCurrency = first
+                            selectedCurrency = first,
+                            isNetworkError = false
                         )
                     }
                     first?.let { selectCurrency(it) }
                 }
 
-                is Result.Failure -> updateUiState {
-                    copy(
-                        isLoading = false,
-                        errorMessage = ExchangeErrorMapper.toMessage(result.exception)
-                    )
+                is Result.Failure -> {
+                    val networkError = ExchangeErrorMapper.isNetworkError(result.exception)
+                    updateUiState {
+                        copy(
+                            isLoading = false,
+                            isNetworkError = networkError,
+                            errorMessage = if (networkError) null
+                            else ExchangeErrorMapper.toMessage(result.exception)
+                        )
+                    }
                 }
 
                 Result.Loading -> {}
