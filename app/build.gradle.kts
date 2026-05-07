@@ -153,7 +153,6 @@ dependencies {
 
     // Networking
     implementation(libs.retrofit)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
@@ -174,6 +173,9 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    implementation(libs.kotlinx.serialization.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

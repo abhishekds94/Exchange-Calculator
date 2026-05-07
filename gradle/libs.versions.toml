@@ -14,10 +14,12 @@ coil = "2.6.0"
 room = "2.6.1"
 junit = "4.13.2"
 junitExt = "1.1.5"
-espresso = "3.5.1"
+espresso = "3.5.0"
 composeTest = "1.6.1"
 kotlinxSerializationJson = "1.6.2"
 splashscreen = "1.0.1"
+mockito = "5.11.0"
+mockitoKotlin = "5.2.1"
 
 [libraries]
 # Android Core
@@ -68,6 +70,9 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeTest" }
 androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test", version.ref = "composeTest" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.7.3" }
 
 # Turbine for Flow testing
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.0.0" }
