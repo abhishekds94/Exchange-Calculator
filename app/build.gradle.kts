@@ -142,6 +142,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -152,7 +153,7 @@ dependencies {
 
     // Networking
     implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
@@ -166,6 +167,9 @@ dependencies {
 
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Flag images
+    implementation(libs.flagkit.android)
 
     // Testing
     testImplementation(libs.junit)

@@ -4,12 +4,20 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Brand Colors
-val BrandGreen = Color(0xFF00C853)
+// ─── Design Tokens (from UI reference) ───────────────────────────────────────
+val BackgroundColor = Color(0xFFF8F8F8)
+val CardColor = Color.White
+val GreenAccent = Color(0xFF22D081)
+val TextPrimary = Color(0xFF2C2C2E)
+val TextSecondary = Color(0xFF8E8E93)
+val CursorColor = Color(0xFF2E7DF6)
+
+// ─── Brand Colors ─────────────────────────────────────────────────────────────
+val BrandGreen = Color(0xFF00C896)
 val BrandGreenDark = Color(0xFF00E676)
 
-// Light theme
-val LightPrimary = Color(0xFF00C853)
+// ─── Light Theme ──────────────────────────────────────────────────────────────
+val LightPrimary = Color(0xFF22D081)
 val LightOnPrimary = Color(0xFFFFFFFF)
 val LightPrimaryContainer = Color(0xFFB9F6CA)
 val LightOnPrimaryContainer = Color(0xFF002114)
@@ -19,14 +27,14 @@ val LightOnSecondary = Color(0xFFFFFFFF)
 val LightSecondaryContainer = Color(0xFFD5E8CF)
 val LightOnSecondaryContainer = Color(0xFF101F0F)
 
-val LightBackground = Color(0xFFF8F9FA)
-val LightOnBackground = Color(0xFF1A1C19)
+val LightBackground = Color(0xFFF8F8F8)
+val LightOnBackground = Color(0xFF2C2C2E)
 
 val LightSurface = Color(0xFFFFFFFF)
-val LightOnSurface = Color(0xFF1A1C19)
+val LightOnSurface = Color(0xFF2C2C2E)
 
 val LightSurfaceVariant = Color(0xFFDEE4D8)
-val LightOnSurfaceVariant = Color(0xFF424940)
+val LightOnSurfaceVariant = Color(0xFF8E8E93)
 
 val LightOutline = Color(0xFF727970)
 val LightOutlineVariant = Color(0xFFC2C9BC)
@@ -36,7 +44,7 @@ val LightOnError = Color(0xFFFFFFFF)
 val LightErrorContainer = Color(0xFFFFDAD6)
 val LightOnErrorContainer = Color(0xFF410002)
 
-// Dark theme
+// ─── Dark Theme ───────────────────────────────────────────────────────────────
 val DarkPrimary = Color(0xFF00E676)
 val DarkOnPrimary = Color(0xFF003822)
 val DarkPrimaryContainer = Color(0xFF00522F)
@@ -63,7 +71,3 @@ val DarkError = Color(0xFFFFB4AB)
 val DarkOnError = Color(0xFF690005)
 val DarkErrorContainer = Color(0xFF93000A)
 val DarkOnErrorContainer = Color(0xFFFFDAD6)
-
-// Utility
-val SuccessGreen = Color(0xFF4CAF50)
-val WarningOrange = Color(0xFFFF9800)

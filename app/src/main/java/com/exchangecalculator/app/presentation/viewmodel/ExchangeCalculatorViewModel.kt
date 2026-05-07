@@ -2,15 +2,14 @@ package com.exchangecalculator.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.exchangecalculator.app.data.network.NetworkErrorHandler
-import com.exchangecalculator.app.data.network.NetworkStateManager
+import com.exchangecalculator.app.domain.error.ExchangeErrorMapper
 import com.exchangecalculator.app.domain.model.Currency
 import com.exchangecalculator.app.domain.model.Result
+import com.exchangecalculator.app.domain.network.NetworkMonitor
 import com.exchangecalculator.app.domain.usecase.CalculateConversionUseCase
 import com.exchangecalculator.app.domain.usecase.GetAvailableCurrenciesUseCase
-import com.exchangecalculator.app.domain.usecase.GetExchangeRateUseCase
-import com.exchangecalculator.app.domain.usecase.ValidateAmountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,18 +21,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ExchangeCalculatorViewModel @Inject constructor(
     private val getAvailableCurrenciesUseCase: GetAvailableCurrenciesUseCase,
-    private val getExchangeRateUseCase: GetExchangeRateUseCase,
     private val calculateConversionUseCase: CalculateConversionUseCase,
-    private val validateAmountUseCase: ValidateAmountUseCase,
-    private val networkStateManager: NetworkStateManager
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
-    // UI State
     private val _uiState = MutableStateFlow(ExchangeCalculatorUiState())
     val uiState: StateFlow<ExchangeCalculatorUiState> = _uiState.asStateFlow()
 
-    // Network state
-    private var isNetworkAvailable = true
+    private var calculationJob: Job? = null
 
     init {
         observeNetworkState()
@@ -42,100 +37,33 @@ class ExchangeCalculatorViewModel @Inject constructor(
 
     private fun observeNetworkState() {
         viewModelScope.launch {
-            networkStateManager.isConnected.collectLatest { isConnected ->
-                isNetworkAvailable = isConnected
-                updateUiState {
-                    copy(isNetworkAvailable = isConnected)
-                }
+            networkMonitor.isConnected.collectLatest { isConnected ->
+                updateUiState { copy(isNetworkAvailable = isConnected) }
             }
         }
     }
 
     private fun loadAvailableCurrencies() {
         viewModelScope.launch {
-            updateUiState { copy(isLoading = true) }
-
+            updateUiState { copy(isLoading = true, errorMessage = null) }
             when (val result = getAvailableCurrenciesUseCase()) {
                 is Result.Success -> {
+                    val first = result.data.firstOrNull()
                     updateUiState {
                         copy(
                             availableCurrencies = result.data,
                             isLoading = false,
-                            selectedCurrency = result.data.firstOrNull()
+                            selectedCurrency = first
                         )
                     }
-                    // Set first currency as default
-                    result.data.firstOrNull()?.let { selectCurrency(it) }
+                    first?.let { selectCurrency(it) }
                 }
 
-                is Result.Failure -> {
-                    val exception = result.exception
-                    val errorMessage = NetworkErrorHandler.getErrorMessage(
-                        NetworkErrorHandler.handleException(exception, isNetworkAvailable)
+                is Result.Failure -> updateUiState {
+                    copy(
+                        isLoading = false,
+                        errorMessage = ExchangeErrorMapper.toMessage(result.exception)
                     )
-                    updateUiState {
-                        copy(
-                            isLoading = false,
-                            errorMessage = errorMessage
-                        )
-                    }
-                }
-
-                Result.Loading -> {
-                    // Handled above
-                }
-            }
-        }
-    }
-
-    fun onUsdcAmountChanged(amount: String) {
-        updateUiState { copy(usdcAmountInput = amount) }
-
-        viewModelScope.launch {
-            delay(300)
-
-            when (val validationResult = validateAmountUseCase(amount)) {
-                is Result.Success -> {
-                    val usdcAmount = validationResult.data
-                    updateUiState { copy(usdcAmount = usdcAmount) }
-
-                    val state = _uiState.value
-                    state.selectedCurrency?.let { currency ->
-                        when (val conversionResult = calculateConversionUseCase(
-                            usdcAmount,
-                            currency.exchangeRate
-                        )) {
-                            is Result.Success -> {
-                                updateUiState {
-                                    copy(
-                                        otherAmount = conversionResult.data,
-                                        otherAmountInput = validateAmountUseCase.formatAmount(
-                                            conversionResult.data
-                                        ),
-                                        errorMessage = null
-                                    )
-                                }
-                            }
-
-                            is Result.Failure -> {
-                                updateUiState {
-                                    copy(errorMessage = "Invalid amount")
-                                }
-                            }
-
-                            Result.Loading -> {}
-                        }
-                    }
-                }
-
-                is Result.Failure -> {
-                    updateUiState {
-                        copy(
-                            errorMessage = "Invalid amount",
-                            otherAmount = 0.0,
-                            otherAmountInput = ""
-                        )
-                    }
                 }
 
                 Result.Loading -> {}
@@ -143,55 +71,55 @@ class ExchangeCalculatorViewModel @Inject constructor(
         }
     }
 
-    fun onOtherAmountChanged(amount: String) {
-        updateUiState { copy(otherAmountInput = amount) }
+    fun onTopAmountChanged(rawDigits: String) {
+        if (_uiState.value.isUsdcOnTop) onUsdcAmountChanged(rawDigits)
+        else onOtherAmountChanged(rawDigits)
+    }
 
-        viewModelScope.launch {
+    fun onUsdcAmountChanged(rawDigits: String) {
+        _uiState.value = _uiState.value.copy(usdcRawDigits = rawDigits)
+        calculationJob?.cancel()
+        calculationJob = viewModelScope.launch {
             delay(300)
+            val amount = rawDigits.toDoubleOrNull() ?: 0.0
+            _uiState.value = _uiState.value.copy(usdcAmount = amount)
+            val currency = _uiState.value.selectedCurrency ?: return@launch
 
-            when (val validationResult = validateAmountUseCase(amount)) {
-                is Result.Success -> {
-                    val otherAmount = validationResult.data
-                    updateUiState { copy(otherAmount = otherAmount) }
+            when (val result = calculateConversionUseCase(amount, currency)) {
+                is Result.Success -> _uiState.value = _uiState.value.copy(
+                    otherAmount = result.data,
+                    otherRawDigits = formatRaw(result.data),
+                    errorMessage = null
+                )
 
-                    val state = _uiState.value
-                    state.selectedCurrency?.let { currency ->
-                        when (val conversionResult = calculateConversionUseCase.reverseConversion(
-                            otherAmount,
-                            currency.exchangeRate
-                        )) {
-                            is Result.Success -> {
-                                updateUiState {
-                                    copy(
-                                        usdcAmount = conversionResult.data,
-                                        usdcAmountInput = validateAmountUseCase.formatAmount(
-                                            conversionResult.data
-                                        ),
-                                        errorMessage = null
-                                    )
-                                }
-                            }
+                is Result.Failure -> _uiState.value = _uiState.value.copy(
+                    errorMessage = "Invalid amount"
+                )
 
-                            is Result.Failure -> {
-                                updateUiState {
-                                    copy(errorMessage = "Invalid amount")
-                                }
-                            }
+                Result.Loading -> {}
+            }
+        }
+    }
 
-                            Result.Loading -> {}
-                        }
-                    }
-                }
+    fun onOtherAmountChanged(rawDigits: String) {
+        _uiState.value = _uiState.value.copy(otherRawDigits = rawDigits)
+        calculationJob?.cancel()
+        calculationJob = viewModelScope.launch {
+            delay(300)
+            val amount = rawDigits.toDoubleOrNull() ?: 0.0
+            _uiState.value = _uiState.value.copy(otherAmount = amount)
+            val currency = _uiState.value.selectedCurrency ?: return@launch
 
-                is Result.Failure -> {
-                    updateUiState {
-                        copy(
-                            errorMessage = "Invalid amount",
-                            usdcAmount = 0.0,
-                            usdcAmountInput = ""
-                        )
-                    }
-                }
+            when (val result = calculateConversionUseCase.reverseConversion(amount, currency)) {
+                is Result.Success -> _uiState.value = _uiState.value.copy(
+                    usdcAmount = result.data,
+                    usdcRawDigits = formatRaw(result.data),
+                    errorMessage = null
+                )
+
+                is Result.Failure -> _uiState.value = _uiState.value.copy(
+                    errorMessage = "Invalid amount"
+                )
 
                 Result.Loading -> {}
             }
@@ -199,75 +127,45 @@ class ExchangeCalculatorViewModel @Inject constructor(
     }
 
     fun selectCurrency(currency: Currency) {
-        updateUiState { copy(selectedCurrency = currency) }
+        _uiState.value = _uiState.value.copy(
+            selectedCurrency = currency,
+            otherAmount = if (currency.isAvailable) _uiState.value.otherAmount else 0.0,
+            otherRawDigits = if (currency.isAvailable) _uiState.value.otherRawDigits else ""
+        )
+        if (!currency.isAvailable) return
 
-        // Recalculate with new currency rate
         val state = _uiState.value
-        when (val result = calculateConversionUseCase(
-            state.usdcAmount,
-            currency.exchangeRate
-        )) {
-            is Result.Success -> {
-                updateUiState {
-                    copy(
-                        otherAmount = result.data,
-                        otherAmountInput = validateAmountUseCase.formatAmount(result.data),
-                        errorMessage = null
-                    )
-                }
-            }
+        when (val result = calculateConversionUseCase(state.usdcAmount, currency)) {
+            is Result.Success -> _uiState.value = _uiState.value.copy(
+                otherAmount = result.data,
+                otherRawDigits = formatRaw(result.data),
+                errorMessage = null
+            )
 
-            is Result.Failure -> {
-                updateUiState { copy(errorMessage = "Error calculating conversion") }
-            }
+            is Result.Failure -> _uiState.value = _uiState.value.copy(
+                errorMessage = "Error calculating conversion"
+            )
 
             Result.Loading -> {}
         }
     }
 
     fun swapCurrencies() {
-        val state = _uiState.value
-
-        updateUiState {
-            copy(
-                usdcAmount = state.otherAmount,
-                usdcAmountInput = state.otherAmountInput,
-                otherAmount = state.usdcAmount,
-                otherAmountInput = state.usdcAmountInput
-            )
-        }
+        _uiState.value = _uiState.value.copy(
+            isUsdcOnTop = !_uiState.value.isUsdcOnTop
+        )
     }
 
-    fun clearError() {
-        updateUiState { copy(errorMessage = null) }
-    }
+    fun clearError() = updateUiState { copy(errorMessage = null) }
 
-    fun retry() {
-        loadAvailableCurrencies()
-    }
+    fun retry() = loadAvailableCurrencies()
 
-    private fun updateUiState(block: ExchangeCalculatorUiState.() -> ExchangeCalculatorUiState) {
+    private fun formatRaw(value: Double): String =
+        String.format("%.2f", value).trimEnd('0').trimEnd('.')
+
+    private fun updateUiState(
+        block: ExchangeCalculatorUiState.() -> ExchangeCalculatorUiState
+    ) {
         _uiState.value = _uiState.value.block()
     }
-}
-
-data class ExchangeCalculatorUiState(
-    val availableCurrencies: List<Currency> = emptyList(),
-    val selectedCurrency: Currency? = null,
-    val usdcAmount: Double = 0.0,
-    val usdcAmountInput: String = "",
-    val otherAmount: Double = 0.0,
-    val otherAmountInput: String = "",
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val isNetworkAvailable: Boolean = true
-) {
-    val selectedCurrencyName: String
-        get() = selectedCurrency?.code ?: "Select Currency"
-
-    val isEnabled: Boolean
-        get() = !isLoading
-
-    val isValidForCalculation: Boolean
-        get() = selectedCurrency != null && isNetworkAvailable
 }

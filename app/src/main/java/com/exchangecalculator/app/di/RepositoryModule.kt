@@ -1,10 +1,9 @@
 package com.exchangecalculator.app.di
 
-import com.exchangecalculator.app.data.remote.ExchangeRateApi
+import com.exchangecalculator.app.data.datasource.CurrencyDataSource
+import com.exchangecalculator.app.data.datasource.NetworkCurrencyDataSource
 import com.exchangecalculator.app.data.repository.CurrencyRepositoryImpl
-import com.exchangecalculator.app.data.repository.HardcodedCurrencyDataSource
-import com.exchangecalculator.app.data.repository.ICurrencyRepository
-import com.exchangecalculator.app.data.repository.NetworkCurrencyDataSource
+import com.exchangecalculator.app.domain.repo.ICurrencyRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,22 +16,13 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideHardcodedCurrencyDataSource(): HardcodedCurrencyDataSource {
-        return HardcodedCurrencyDataSource()
-    }
+    fun provideCurrencyDataSource(
+        networkDataSource: NetworkCurrencyDataSource
+    ): CurrencyDataSource = networkDataSource
 
     @Provides
     @Singleton
-    fun provideNetworkCurrencyDataSource(
-        exchangeRateApi: ExchangeRateApi
-    ): NetworkCurrencyDataSource {
-        return NetworkCurrencyDataSource(exchangeRateApi)
-    }
-    @Provides
-    @Singleton
     fun provideCurrencyRepository(
-        hardcodedDataSource: HardcodedCurrencyDataSource
-    ): ICurrencyRepository {
-        return CurrencyRepositoryImpl(dataSource = hardcodedDataSource)
-    }
+        dataSource: CurrencyDataSource
+    ): ICurrencyRepository = CurrencyRepositoryImpl(dataSource)
 }

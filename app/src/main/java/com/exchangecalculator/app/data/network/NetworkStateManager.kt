@@ -2,43 +2,58 @@ package com.exchangecalculator.app.data.network
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.flow.Flow
+import com.exchangecalculator.app.domain.network.NetworkMonitor
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class NetworkStateManager(private val context: Context) {
+@Singleton
+class NetworkStateManager @Inject constructor(
+    private val context: Context
+) : NetworkMonitor {
 
-    private val _isConnected = MutableStateFlow(isNetworkAvailable())
-    val isConnected: Flow<Boolean> = _isConnected.asStateFlow()
+    private val _isConnected = MutableStateFlow(checkConnection())
+    override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
-    init {
-        updateNetworkState()
-    }
+    private val connectivityManager =
+        ContextCompat.getSystemService(context, ConnectivityManager::class.java)
 
-    fun isNetworkAvailable(): Boolean {
-        return try {
-            val connectivityManager = ContextCompat.getSystemService(
-                context,
-                ConnectivityManager::class.java
-            ) ?: return false
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            _isConnected.value = true
+        }
 
-            val network = connectivityManager.activeNetwork ?: return false
-            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        override fun onLost(network: Network) {
+            _isConnected.value = checkConnection()
+        }
 
-            when {
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                else -> false
-            }
-        } catch (e: Exception) {
-            false
+        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+            _isConnected.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         }
     }
 
-    private fun updateNetworkState() {
-        _isConnected.value = isNetworkAvailable()
+    init {
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        connectivityManager?.registerNetworkCallback(request, networkCallback)
+    }
+
+    private fun checkConnection(): Boolean {
+        return try {
+            val network = connectivityManager?.activeNetwork ?: return false
+            val caps = connectivityManager.getNetworkCapabilities(network) ?: return false
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        } catch (e: Exception) {
+            false
+        }
     }
 }
