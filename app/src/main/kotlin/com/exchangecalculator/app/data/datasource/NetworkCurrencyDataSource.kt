@@ -10,6 +10,7 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import javax.inject.Inject
 
+@kotlinx.serialization.InternalSerializationApi
 class NetworkCurrencyDataSource @Inject constructor(
     private val api: ExchangeRateApi,
     private val json: Json,
@@ -100,9 +101,6 @@ class NetworkCurrencyDataSource @Inject constructor(
             Result.Failure(e)
         }
     }
-
-    override suspend fun getAllExchangeRates(): Result<List<Currency>> =
-        getAvailableCurrencies()
 
     private suspend fun fetchApiCurrencyCodes(): List<String> {
         return try {

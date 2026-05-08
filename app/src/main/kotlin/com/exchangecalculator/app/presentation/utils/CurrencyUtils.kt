@@ -2,7 +2,7 @@ package com.exchangecalculator.app.presentation.utils
 
 fun getEmojiFlag(currencyCode: String): String {
     return when (currencyCode.uppercase()) {
-        "USDC", "USDC" -> "🇺🇸"
+        "USDc", "USDC" -> "🇺🇸"
         "MXN" -> "🇲🇽"
         "ARS" -> "🇦🇷"
         "COP" -> "🇨🇴"

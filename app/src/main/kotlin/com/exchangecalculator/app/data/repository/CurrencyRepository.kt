@@ -15,8 +15,4 @@ class CurrencyRepositoryImpl @Inject constructor(
 
     override suspend fun getExchangeRate(currencyCode: String): Result<Currency> =
         dataSource.getExchangeRate(currencyCode)
-
-    // for future usage when API returns data
-    override suspend fun getAllExchangeRates(): Result<List<Currency>> =
-        dataSource.getAllExchangeRates()
 }

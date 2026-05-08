@@ -8,12 +8,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
 
+    @OptIn(InternalSerializationApi::class)
     @Provides
     @Singleton
     fun provideCurrencyDataSource(

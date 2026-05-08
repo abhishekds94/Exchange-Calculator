@@ -1,14 +1,13 @@
 package com.exchangecalculator.app.data.model
 
-import android.annotation.SuppressLint
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@SuppressLint("UnsafeOptInUsageError")
+@kotlinx.serialization.InternalSerializationApi
 @Serializable
 data class ExchangeRateDto(
-    @SerialName("ask") val ask: String = "",
-    @SerialName("bid") val bid: String = "",
+    @SerialName("ask")  val ask: String = "",
+    @SerialName("bid")  val bid: String = "",
     @SerialName("book") val book: String = "",
     @SerialName("date") val date: String = ""
 ) {

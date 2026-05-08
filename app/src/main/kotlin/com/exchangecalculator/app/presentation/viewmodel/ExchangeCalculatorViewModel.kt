@@ -71,8 +71,6 @@ class ExchangeCalculatorViewModel @Inject constructor(
                         )
                     }
                 }
-
-                Result.Loading -> {}
             }
         }
     }
@@ -101,8 +99,6 @@ class ExchangeCalculatorViewModel @Inject constructor(
                 is Result.Failure -> _uiState.value = _uiState.value.copy(
                     errorMessage = "Invalid amount"
                 )
-
-                Result.Loading -> {}
             }
         }
     }
@@ -126,8 +122,6 @@ class ExchangeCalculatorViewModel @Inject constructor(
                 is Result.Failure -> _uiState.value = _uiState.value.copy(
                     errorMessage = "Invalid amount"
                 )
-
-                Result.Loading -> {}
             }
         }
     }
@@ -151,8 +145,6 @@ class ExchangeCalculatorViewModel @Inject constructor(
             is Result.Failure -> _uiState.value = _uiState.value.copy(
                 errorMessage = "Error calculating conversion"
             )
-
-            Result.Loading -> {}
         }
     }
 
