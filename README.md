@@ -4,6 +4,24 @@ A production-ready Android currency exchange calculator that fetches **live exch
 
 ---
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/screenshot_calculator.png" width="22%" alt="Calculator — USDc to MXN"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/screenshot_picker.png" width="22%" alt="Currency picker with unavailable EURc"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/screenshot_cop.png" width="22%" alt="Calculator — USDc to COP"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/screenshot_swapped.png" width="22%" alt="Swapped — COP to USDc"/>
+</p>
+
+<p align="center">
+  <em>Calculator screen &nbsp;·&nbsp; Currency picker &nbsp;·&nbsp; Large amounts (COP) &nbsp;·&nbsp; Swapped direction</em>
+</p>
+
+---
+
 ## 📱 Features
 
 - **Live exchange rates** fetched from a real financial API
