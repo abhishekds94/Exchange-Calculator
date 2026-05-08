@@ -11,4 +11,5 @@
     <string name="error_timeout">Request timed out. Please try again.</string>
     <string name="retry">Retry</string>
     <string name="close">Close</string>
+    <string name="rate_unavailable">Rate unavailable</string>
 </resources>

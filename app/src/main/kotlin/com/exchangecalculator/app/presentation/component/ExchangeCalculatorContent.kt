@@ -16,11 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.exchangecalculator.app.R
 import com.exchangecalculator.app.domain.model.Currency
 import com.exchangecalculator.app.presentation.ui.theme.BackgroundColor
 import com.exchangecalculator.app.presentation.ui.theme.GreenAccent
@@ -46,7 +48,7 @@ fun ExchangeCalculatorContent(
             .padding(top = 56.dp)
     ) {
         Text(
-            text = "Exchange calculator",
+            text = stringResource(R.string.app_name),
             style = TextStyle(
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,

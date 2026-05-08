@@ -31,12 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.exchangecalculator.app.R
 import com.exchangecalculator.app.data.datasource.HardcodedCurrencyDataSource
 import com.exchangecalculator.app.domain.model.Currency
 import com.exchangecalculator.app.presentation.ui.theme.ExchangeCalculatorTheme
@@ -189,7 +191,7 @@ fun CurrencyPickerItem(
 
                 if (!currency.isAvailable) {
                     Text(
-                        text = "Rate unavailable",
+                        text = stringResource(R.string.rate_unavailable),
                         fontSize = 12.sp,
                         color = Color(0xFFFF6B6B)
                     )
